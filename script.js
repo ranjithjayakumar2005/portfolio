@@ -41,15 +41,22 @@ const typed = new Typed('.typing', {
 });
 
 /* EMAIL JS */
+// Initialize EmailJS with your public key (required for @emailjs/browser v3+)
+emailjs.init('Qs2pXsRFAOC4qWQki')
+
 const contactForm = document.getElementById('contact-form'),
     contactMessage = document.getElementById('contact-message')
 
 const sendEmail = (e) => {
     e.preventDefault()
 
-    // serviceID - templateID - #form - publicKey
-    // Note: User needs to replace THESE with their own from EmailJS dashboard
-    emailjs.sendForm('service_yoyhpqp', 'template_95ogfp5', '#contact-form', 'Qs2pXsRFAOC4qWQki')
+    // Disable button to prevent double submission
+    const btn = contactForm.querySelector('button[type="submit"]')
+    btn.disabled = true
+    btn.textContent = 'Sending...'
+
+    // serviceID - templateID - #form (publicKey now set via emailjs.init above)
+    emailjs.sendForm('service_yoyhpqp', 'template_95ogfp5', '#contact-form')
         .then(() => {
             // Show sent message
             contactMessage.textContent = 'Message sent successfully ✅'
@@ -62,10 +69,16 @@ const sendEmail = (e) => {
 
             // Clear input fields
             contactForm.reset()
-        }, () => {
-            // Show error message
+        }, (error) => {
+            // Show error message with detail
+            console.error('EmailJS error:', error)
             contactMessage.textContent = 'Message not sent (service error) ❌'
             contactMessage.style.color = 'red'
+        })
+        .finally(() => {
+            // Re-enable button
+            btn.disabled = false
+            btn.innerHTML = 'Send Message <i class="fa-solid fa-paper-plane"></i>'
         })
 }
 contactForm.addEventListener('submit', sendEmail)
